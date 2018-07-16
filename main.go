@@ -71,12 +71,19 @@ func measureFile(location string, outStream, errStream io.Writer) int {
 }
 
 func measureURL(location string, outStream, errStream io.Writer) int {
-	res, err := http.Head(location)
+	client := &http.Client{}
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		fmt.Fprintf(outStream, "Redirectd to %s\n", req.URL)
+		return nil
+	}
+
+	resp, err := client.Head(location)
 	if err != nil {
 		fmt.Fprintf(errStream, "%v\n", err)
 		return 1
 	}
 
-	fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(res.ContentLength)))
+	fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+
 	return 0
 }
