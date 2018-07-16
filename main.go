@@ -83,7 +83,11 @@ func measureURL(location string, outStream, errStream io.Writer) int {
 		return 1
 	}
 
-	fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+	if resp.ContentLength >= 0 {
+		fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+	} else {
+		fmt.Fprintf(outStream, "Can not get Content-Length from %s\n", location)
+	}
 
 	return 0
 }
