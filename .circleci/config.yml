@@ -17,6 +17,11 @@ test: &test
           go get -u golang.org/x/lint/golint
           golint -set_exit_status
     - run:
+        name: Run megacheck
+        command: |
+          go get honnef.co/go/tools/cmd/megacheck
+          megacheck
+    - run:
         name: Run tests
         command: go test -v
 
