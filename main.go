@@ -75,16 +75,30 @@ func measureFile(location string, outStream, errStream io.Writer) int {
 }
 
 func measureURL(location string, outStream, errStream io.Writer) int {
+	var resp *http.Response
+	var err error
+	lastLocation := location
+
 	client := &http.Client{}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		debugLogger.Printf("Redirectd to %s\n", req.URL)
+		lastLocation = req.URL.String()
 		return nil
 	}
 
-	resp, err := client.Head(location)
-	if err != nil {
-		fmt.Fprintf(errStream, "%v\n", err)
-		return 1
+	retryCount := 3 // TODO: Can specify a value from arguments.
+
+	for i := 0; i < retryCount; i++ {
+		resp, err = client.Head(lastLocation)
+		if err != nil {
+			fmt.Fprintf(errStream, "%v\n", err)
+			return 1
+		}
+
+		if resp.ContentLength >= 0 {
+			break
+		}
+		debugLogger.Printf("Retry(count: %d, URL: %s)\n", i+1, lastLocation)
 	}
 
 	if resp.ContentLength >= 0 {
