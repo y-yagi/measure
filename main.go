@@ -9,12 +9,15 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/y-yagi/dlogger"
 )
 
 const (
 	version = "0.1.0"
 	cmd     = "measure"
 )
+
+var debugLogger *dlogger.DebugLogger
 
 func main() {
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
@@ -52,6 +55,7 @@ func usage(errStream io.Writer) {
 }
 
 func measure(location string, outStream, errStream io.Writer) int {
+	debugLogger = dlogger.New(outStream)
 	if strings.HasPrefix(location, "http") {
 		return measureURL(location, outStream, errStream)
 	}
@@ -73,7 +77,7 @@ func measureFile(location string, outStream, errStream io.Writer) int {
 func measureURL(location string, outStream, errStream io.Writer) int {
 	client := &http.Client{}
 	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		fmt.Fprintf(outStream, "Redirectd to %s\n", req.URL)
+		debugLogger.Printf("Redirectd to %s\n", req.URL)
 		return nil
 	}
 
