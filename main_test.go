@@ -15,8 +15,8 @@ func TestMeasure(t *testing.T) {
 	}
 
 	out.Reset()
-	measure("https://github.com/y-yagi/rails_api_sample/archive/master.zip", out, err)
-	expected = "https://github.com/y-yagi/rails_api_sample/archive/master.zip: 28.7K\n"
+	measure("https://raw.githubusercontent.com/y-yagi/rails_api_sample/master/Gemfile", out, err)
+	expected = "https://raw.githubusercontent.com/y-yagi/rails_api_sample/master/Gemfile: 958B\n"
 	if out.String() != expected {
 		t.Errorf("Expect out is %q, but %q", out.String(), expected)
 	}
