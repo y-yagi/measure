@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/bytefmt"
-	"github.com/y-yagi/dlogger"
+	"github.com/y-yagi/debuglog"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 	cmd     = "measure"
 )
 
-var debugLogger *dlogger.DebugLogger
+var debugLogger *debuglog.Logger
 
 func main() {
 	os.Exit(run(os.Args, os.Stdout, os.Stderr))
@@ -55,7 +55,7 @@ func usage(errStream io.Writer) {
 }
 
 func measure(location string, outStream, errStream io.Writer) int {
-	debugLogger = dlogger.New(outStream)
+	debugLogger = debuglog.New(outStream)
 	if strings.HasPrefix(location, "http") {
 		return measureURL(location, outStream, errStream)
 	}
