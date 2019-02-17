@@ -4,10 +4,10 @@ test: &test
   steps:
     - checkout
     - run:
-        name : Run dep
+        name: Run go mod
         command: |
-          curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-          dep ensure
+          go mod download
+          go mod vendor
     - run:
         name: Run vet
         command: go vet
@@ -17,24 +17,20 @@ test: &test
           go get -u golang.org/x/lint/golint
           golint -set_exit_status
     - run:
-        name: Run megacheck
+        name: Run staticcheck
         command: |
-          go get honnef.co/go/tools/cmd/megacheck
-          megacheck
+          go get -u honnef.co/go/tools/cmd/staticcheck
+          staticcheck
     - run:
         name: Run tests
         command: go test -v
 
 jobs:
-  go-1.10-test:
-    docker:
-      - image: circleci/golang:1.10
-    working_directory: /go/src/github.com/y-yagi/measure
-    <<: *test
-
   go-1.11-test:
     docker:
       - image: circleci/golang:1.11
+        environment:
+          GO111MODULE: "on"
     working_directory: /go/src/github.com/y-yagi/measure
     <<: *test
 
@@ -42,5 +38,4 @@ workflows:
   version: 2
   build:
     jobs:
-      - go-1.10-test
       - go-1.11-test
