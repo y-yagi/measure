@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -60,17 +61,29 @@ func measure(location string, outStream, errStream io.Writer) int {
 		return measureURL(location, outStream, errStream)
 	}
 
-	return measureFile(location, outStream, errStream)
+	return measureFileOrDir(location, outStream, errStream)
 }
 
-func measureFile(location string, outStream, errStream io.Writer) int {
+func measureFileOrDir(location string, outStream, errStream io.Writer) int {
 	fileInfo, err := os.Stat(location)
 	if err != nil {
 		fmt.Fprintf(errStream, "%v\n", err)
 		return 1
 	}
 
-	fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(fileInfo.Size())))
+	if fileInfo.IsDir() {
+		files, err := ioutil.ReadDir(fileInfo.Name())
+		if err != nil {
+			fmt.Fprintf(errStream, "%v\n", err)
+			return 1
+		}
+
+		for _, file := range files {
+			fmt.Fprintf(outStream, "%s: %s\n", file.Name(), bytefmt.ByteSize(uint64(file.Size())))
+		}
+	} else {
+		fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(fileInfo.Size())))
+	}
 	return 0
 }
 

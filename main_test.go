@@ -20,4 +20,11 @@ func TestMeasure(t *testing.T) {
 	if out.String() != expected {
 		t.Errorf("Expect out is %q, but %q", out.String(), expected)
 	}
+
+	out.Reset()
+	measure("testdata/", out, err)
+	expected = "test.txt: 9B\ntest.zip: 8.5K\n"
+	if out.String() != expected {
+		t.Errorf("Expect out is %q, but %q", out.String(), expected)
+	}
 }
