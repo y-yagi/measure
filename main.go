@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/fatih/color"
 	"github.com/y-yagi/debuglog"
 )
 
@@ -79,10 +80,10 @@ func measureFileOrDir(location string, outStream, errStream io.Writer) int {
 		}
 
 		for _, file := range files {
-			fmt.Fprintf(outStream, "%s: %s\n", file.Name(), bytefmt.ByteSize(uint64(file.Size())))
+			fmt.Fprintf(outStream, "%s: %s\n", file.Name(), decoratedSize(uint64(file.Size())))
 		}
 	} else {
-		fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(fileInfo.Size())))
+		fmt.Fprintf(outStream, "%s: %s\n", location, decoratedSize(uint64(fileInfo.Size())))
 	}
 	return 0
 }
@@ -116,7 +117,7 @@ func measureURL(location string, outStream, errStream io.Writer) int {
 
 	if isSuccess(resp) {
 		if resp.ContentLength >= 0 {
-			fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+			fmt.Fprintf(outStream, "%s: %s\n", location, decoratedSize(uint64(resp.ContentLength)))
 		} else {
 			fmt.Fprintf(outStream, "Can not get Content-Length from %s\n", location)
 		}
@@ -130,4 +131,8 @@ func measureURL(location string, outStream, errStream io.Writer) int {
 
 func isSuccess(resp *http.Response) bool {
 	return resp.StatusCode >= 200 && resp.StatusCode < 300
+}
+
+func decoratedSize(size uint64) string {
+	return color.GreenString(bytefmt.ByteSize(size))
 }
