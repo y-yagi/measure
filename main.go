@@ -114,11 +114,20 @@ func measureURL(location string, outStream, errStream io.Writer) int {
 		debugLogger.Printf("Retry(count: %d, URL: %s)\n", i+1, lastLocation)
 	}
 
-	if resp.ContentLength >= 0 {
-		fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+	if isSuccess(resp) {
+		if resp.ContentLength >= 0 {
+			fmt.Fprintf(outStream, "%s: %s\n", location, bytefmt.ByteSize(uint64(resp.ContentLength)))
+		} else {
+			fmt.Fprintf(outStream, "Can not get Content-Length from %s\n", location)
+		}
 	} else {
-		fmt.Fprintf(outStream, "Can not get Content-Length from %s\n", location)
+		fmt.Fprintf(outStream, "Error: %s\n", resp.Status)
+		return 1
 	}
 
 	return 0
+}
+
+func isSuccess(resp *http.Response) bool {
+	return resp.StatusCode >= 200 && resp.StatusCode < 300
 }
