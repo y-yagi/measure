@@ -28,10 +28,12 @@ func main() {
 func run(args []string, outStream, errStream io.Writer) (exitCode int) {
 
 	var showVersion bool
+	var retryCount int
 
 	flags := flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.SetOutput(errStream)
 	flags.BoolVar(&showVersion, "v", false, "show version")
+	flags.IntVar(&retryCount, "r", 3, "retry count")
 	flags.Parse(args[1:])
 
 	exitCode = 0
@@ -47,7 +49,7 @@ func run(args []string, outStream, errStream io.Writer) (exitCode int) {
 		return
 	}
 
-	exitCode = measure(flags.Args()[0], outStream, errStream)
+	exitCode = measure(flags.Args()[0], retryCount, outStream, errStream)
 
 	return
 }
@@ -56,10 +58,10 @@ func usage(errStream io.Writer) {
 	fmt.Fprintf(errStream, "Usage: %s [OPTIONS] LOCATION\n", cmd)
 }
 
-func measure(location string, outStream, errStream io.Writer) int {
+func measure(location string, retryCount int, outStream, errStream io.Writer) int {
 	debugLogger = debuglog.New(outStream)
 	if strings.HasPrefix(location, "http") {
-		return measureURL(location, outStream, errStream)
+		return measureURL(location, retryCount, outStream, errStream)
 	}
 
 	return measureFileOrDir(location, outStream, errStream)
@@ -88,7 +90,7 @@ func measureFileOrDir(location string, outStream, errStream io.Writer) int {
 	return 0
 }
 
-func measureURL(location string, outStream, errStream io.Writer) int {
+func measureURL(location string, retryCount int, outStream, errStream io.Writer) int {
 	var resp *http.Response
 	var err error
 	lastLocation := location
@@ -99,8 +101,6 @@ func measureURL(location string, outStream, errStream io.Writer) int {
 		lastLocation = req.URL.String()
 		return nil
 	}
-
-	retryCount := 3 // TODO: Can specify a value from arguments.
 
 	for i := 0; i < retryCount; i++ {
 		resp, err = client.Head(lastLocation)
