@@ -1,7 +1,5 @@
 # measure
 
-[![CircleCI](https://circleci.com/gh/y-yagi/measure.svg?style=svg)](https://circleci.com/gh/y-yagi/measure)
-
 measure is a simple tool for measuring file size. Also supports http protocol, you can measure the size before downloading the file.
 
 ```
