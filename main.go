@@ -30,13 +30,18 @@ func run(args []string, outStream, errStream io.Writer) (exitCode int) {
 	var showVersion bool
 	var retryCount int
 
+	exitCode = 0
+
 	flags := flag.NewFlagSet(cmd, flag.ExitOnError)
 	flags.SetOutput(errStream)
 	flags.BoolVar(&showVersion, "v", false, "show version")
 	flags.IntVar(&retryCount, "r", 3, "retry count")
-	flags.Parse(args[1:])
 
-	exitCode = 0
+	if err := flags.Parse(args[1:]); err != nil {
+		fmt.Fprintf(errStream, "%v\n", err)
+		exitCode = 1
+		return
+	}
 
 	if showVersion {
 		fmt.Fprintf(outStream, "%s version: %s\n", cmd, version)
