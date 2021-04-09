@@ -1,5 +1,7 @@
 module github.com/y-yagi/measure
 
+go 1.16
+
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
 	github.com/fatih/color v1.7.0
