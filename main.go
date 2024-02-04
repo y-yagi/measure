@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -80,14 +79,19 @@ func measureFileOrDir(location string, outStream, errStream io.Writer) int {
 	}
 
 	if fileInfo.IsDir() {
-		files, err := ioutil.ReadDir(fileInfo.Name())
+		files, err := os.ReadDir(fileInfo.Name())
 		if err != nil {
 			fmt.Fprintf(errStream, "%v\n", err)
 			return 1
 		}
 
 		for _, file := range files {
-			fmt.Fprintf(outStream, "%s: %s\n", file.Name(), decoratedSize(uint64(file.Size())))
+			info, err := file.Info()
+			if err != nil {
+				fmt.Fprintf(errStream, "%v\n", err)
+			} else {
+				fmt.Fprintf(outStream, "%s: %s\n", file.Name(), decoratedSize(uint64(info.Size())))
+			}
 		}
 	} else {
 		fmt.Fprintf(outStream, "%s: %s\n", location, decoratedSize(uint64(fileInfo.Size())))
