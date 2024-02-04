@@ -1,6 +1,6 @@
 module github.com/y-yagi/measure
 
-go 1.16
+go 1.21
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
